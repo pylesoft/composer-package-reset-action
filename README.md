@@ -21,6 +21,8 @@ The core registry covers `floorbox/cbox-framework`, `floorbox/cbox-admin-module`
 
 Composer updates are restricted to those present packages. The existing lock is preserved, unrelated dependency changes fail validation, and no broad update fallback runs. Missing locks, failed metadata lookups, solver conflicts, unexpected files, or rejected normal pushes fail visibly. Correct constraints still refresh stale lock entries. An unchanged result does not create a commit.
 
+For multiple manifests, all constraints are restored before Composer resolves either lock. A core package selected by one manifest is also refreshed in other selected locks where it already exists. This keeps Pyle's local Framework dependency metadata and its shared ERP Bridge lock entries consistent without adding root requirements.
+
 Inputs include `composer-files` (default `["composer.json"]`), `package-repositories` (owning-repository overrides for the dummy sandbox), `commit-message`, and `push`. Setting `push: 'false'` leaves validated edits without committing. Outputs are `outcome`, `commit-sha`, and `changed-files`; the action also writes a job summary.
 
 Run the integration tests with `python3 -m unittest discover -s tests -v`. They use real Composer and temporary Git repositories; only GitHub metadata calls are replaced with local fixture responses.

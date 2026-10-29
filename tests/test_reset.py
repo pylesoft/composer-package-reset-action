@@ -160,6 +160,39 @@ else:
         self.assertEqual(self.command(['git', 'diff-tree', '--no-commit-id', '--name-only', '-r', 'HEAD']).stdout.splitlines(),
                          ['composer.json', 'composer.lock', 'nested/composer.json', 'nested/composer.lock'])
 
+    def test_path_packages_use_restored_manifests_and_refresh_shared_core_locks(self):
+        framework = self.manifest('packages/framework', targets=[CORE[4]])
+        framework_payload = json.loads(framework.read_text())
+        framework_payload['name'] = CORE[0]
+        framework.write_text(json.dumps(framework_payload, indent=4) + '\n')
+        app = self.manifest('apps/laravel', targets=[CORE[4]])
+        app_payload = json.loads(app.read_text())
+        app_payload['require'].pop(CORE[4])
+        app_payload['require'][CORE[0]] = 'dev-main'
+        app_payload['repositories'].insert(0, {
+            'type': 'path', 'url': '../../packages/framework',
+            'options': {'versions': {CORE[0]: 'dev-main'}},
+        })
+        app.write_text(json.dumps(app_payload, indent=4) + '\n')
+        self.command(['composer', 'update', '--working-dir=' + str(app.parent),
+                      '--no-install', '--no-scripts', '--no-interaction', '--no-progress'])
+        self.publish_fixture()
+
+        result = self.reset(RESET_COMPOSER_FILES='["apps/laravel/composer.json", "packages/framework/composer.json"]')
+
+        self.assertEqual(result.returncode, 0, result.stdout)
+        self.assertEqual(self.locked('apps/laravel')[CORE[4]], 'dev-master')
+        self.assertEqual(self.locked('packages/framework')[CORE[4]], 'dev-master')
+        app_lock = json.loads(app.with_suffix('.lock').read_text())
+        locked_framework = next(package for package in app_lock['packages'] if package['name'] == CORE[0])
+        self.assertEqual(locked_framework['require'][CORE[4]], 'dev-master')
+        self.assertNotIn(CORE[4], json.loads(app.read_text())['require'])
+        self.assertEqual(self.locked('apps/laravel')['fixture/unrelated'], '1.0.0')
+        after = self.command(['git', 'rev-parse', 'HEAD']).stdout.strip()
+        repeat = self.reset(RESET_COMPOSER_FILES='["apps/laravel/composer.json", "packages/framework/composer.json"]')
+        self.assertEqual(repeat.returncode, 0, repeat.stdout)
+        self.assertEqual(after, self.command(['git', 'rev-parse', 'HEAD']).stdout.strip())
+
     def test_solver_failure_does_not_commit_or_push(self):
         path = self.manifest(targets=[CORE[0]])
         payload = json.loads(path.read_text())

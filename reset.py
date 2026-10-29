@@ -166,8 +166,11 @@ def main():
     allowed = set()
     for path, payload, names, before in targets:
         restore_constraints(path, payload, constraints)
-        refresh_and_validate_lock(path, names, before, constraints)
         allowed.update([str(path.relative_to(root)), str(path.with_suffix('.lock').relative_to(root))])
+    for path, _, names, before in targets:
+        shared_core_packages = packages.intersection(locked_packages(before))
+        update_packages = sorted(set(names) | shared_core_packages)
+        refresh_and_validate_lock(path, update_packages, before, constraints)
     changed = command(['git', 'diff', '--name-only']).splitlines()
     if not changed:
         report('unchanged')
