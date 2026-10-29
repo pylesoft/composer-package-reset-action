@@ -1,0 +1,45 @@
+name: Restore Pyle development dependencies
+description: Reset present Pyle core requirements to their package default branches and push matching Composer locks.
+inputs:
+  development-branch:
+    description: App development branch checked out by the caller.
+    required: true
+  composer-files:
+    description: JSON array of Composer manifest paths relative to the repository root.
+    default: '["composer.json"]'
+  package-repositories:
+    description: Optional JSON map overriding owning repositories for known core packages, for example in the dummy sandbox.
+    default: '{}'
+  github-token:
+    description: Token used to read package repository default branches.
+    default: ${{ github.token }}
+  commit-message:
+    description: Message for the reset commit.
+    default: 'chore: restore Pyle development dependencies'
+  push:
+    description: Set false to prepare and validate files without committing or pushing.
+    default: 'true'
+outputs:
+  outcome:
+    description: skipped, unchanged, prepared, or pushed.
+    value: ${{ steps.reset.outputs.outcome }}
+  commit-sha:
+    description: Pushed commit SHA, if any.
+    value: ${{ steps.reset.outputs.commit-sha }}
+  changed-files:
+    description: JSON array of changed manifest and lock paths.
+    value: ${{ steps.reset.outputs.changed-files }}
+runs:
+  using: composite
+  steps:
+    - name: Reset requirements and Composer locks
+      id: reset
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github-token }}
+        RESET_DEVELOPMENT_BRANCH: ${{ inputs.development-branch }}
+        RESET_COMPOSER_FILES: ${{ inputs.composer-files }}
+        RESET_PACKAGE_REPOSITORIES: ${{ inputs.package-repositories }}
+        RESET_COMMIT_MESSAGE: ${{ inputs.commit-message }}
+        RESET_PUSH: ${{ inputs.push }}
+      run: python3 "$GITHUB_ACTION_PATH/reset.py"
