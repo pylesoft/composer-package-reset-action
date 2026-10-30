@@ -15,7 +15,7 @@ Reset every present Pyle core dependency to its owning repository's default bran
     github-token: ${{ secrets.GH_ACTION_SPLIT_PACKAGES_TOKEN }}
 ```
 
-The caller must check out a clean, current development branch and provide Composer and Git push credentials. Run this workflow after normal publication and production synchronization, not during draft preparation or hotfixes.
+The composite action uses Bash and PHP, following the existing Composer package bump action's approach. The caller must check out a clean, current development branch and provide PHP, Composer, and Git push credentials. Run this workflow after normal publication and production synchronization, not during draft preparation or hotfixes.
 
 The core registry covers `floorbox/cbox-framework`, `floorbox/cbox-admin-module`, `floorbox/cbox-storefront-module`, `pylesoft/admin`, and `floorbox/pyle-erp-bridge-module`. Only present requirements are changed; `require-dev` entries stay in their section. Feature branches, aliases, commit pins, and release constraints are replaced deliberately.
 

@@ -42,4 +42,4 @@ runs:
         RESET_PACKAGE_REPOSITORIES: ${{ inputs.package-repositories }}
         RESET_COMMIT_MESSAGE: ${{ inputs.commit-message }}
         RESET_PUSH: ${{ inputs.push }}
-      run: python3 "$GITHUB_ACTION_PATH/reset.py"
+      run: php "$GITHUB_ACTION_PATH/reset.php"

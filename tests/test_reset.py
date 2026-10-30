@@ -2,11 +2,10 @@ import json
 import os
 from pathlib import Path
 import subprocess
-import sys
 import tempfile
 import unittest
 
-ACTION = Path(__file__).resolve().parents[1] / 'reset.py'
+ACTION = Path(__file__).resolve().parents[1] / 'reset.php'
 CORE = ['floorbox/cbox-framework', 'floorbox/cbox-admin-module',
         'floorbox/cbox-storefront-module', 'pylesoft/admin',
         'floorbox/pyle-erp-bridge-module']
@@ -81,7 +80,7 @@ else:
 
     def reset(self, **options):
         env = dict(self.env, **options)
-        return self.command([sys.executable, str(ACTION)], check=False, env=env)
+        return self.command(['php', str(ACTION)], check=False, env=env)
 
     def locked(self, directory='.'):
         lock = json.loads((self.repo / directory / 'composer.lock').read_text())
