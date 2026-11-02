@@ -9,7 +9,7 @@ Reset every present Pyle core dependency to its owning repository's default bran
     token: ${{ secrets.GH_ACTION_SPLIT_PACKAGES_TOKEN }}
 
 # Set up PHP/Composer and Composer authentication before running the action.
-- uses: pylesoft/composer-package-reset-action@<reviewed-commit>
+- uses: pylesoft/composer-package-reset-action@v1.0.0
   with:
     development-branch: ${{ github.event.repository.default_branch }}
     github-token: ${{ secrets.GH_ACTION_SPLIT_PACKAGES_TOKEN }}
